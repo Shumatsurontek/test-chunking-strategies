@@ -2,27 +2,33 @@ import logging
 import os
 import datetime
 
-def get_logger(name, file_path=None):
-    logger = logging.getLogger(name)
-    logger.setLevel(logging.DEBUG)
+logger = logging.getLogger("chunking")
+logger.setLevel(logging.DEBUG)
+if not logger.hasHandlers():
     handler = logging.StreamHandler()
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     handler.setFormatter(formatter)
     logger.addHandler(handler)
-    if file_path:
-        file_handler = logging.FileHandler(os.path.join(file_path, f"{datetime.datetime.now().strftime('%Y-%m-%d')}.log"))
-        file_handler.setFormatter(formatter)
-        logger.addHandler(file_handler)
-    return logger
 
-def logger_info(logger, message):
+def init_logger(file_path=None):
+    if file_path:
+        os.makedirs(file_path, exist_ok=True)
+        file_handler = logging.FileHandler(
+            os.path.join(file_path, f"{datetime.datetime.now().strftime('%Y-%m-%d')}.log")
+        )
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        file_handler.setFormatter(formatter)
+        if not any(isinstance(h, logging.FileHandler) for h in logger.handlers):
+            logger.addHandler(file_handler)
+
+def log_info(message):
     logger.info(message)
 
-def logger_debug(logger, message):
+def log_debug(message):
     logger.debug(message)
 
-def logger_warning(logger, message):
+def log_warning(message):
     logger.warning(message)
 
-def logger_error(logger, message): 
+def log_error(message):
     logger.error(message)

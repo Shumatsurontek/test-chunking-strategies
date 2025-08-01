@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-from utils.logger import get_logger, logger_info, logger_debug, logger_warning
+from utils.logger import init_logger, log_info, log_debug, log_warning, log_error
 from test.text import TEXT
 from langchain_text_splitters.sentence_transformers import SentenceTransformersTokenTextSplitter
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -80,12 +80,12 @@ def score_chunking(row):
 def main(save_results=False, save_dir=None):
     if save_dir:
         os.makedirs(save_dir, exist_ok=True)
-    logger = get_logger("chunking", save_dir)
+    init_logger(save_dir)
     test_text = TEXT
     test_metadata = {"source": "test", "langue": "français"}
 
-    logger_info(logger, "🚀 Test du chunking")
-    logger_debug(logger, f"Texte original: {test_text[:100]}...")  # Affiche seulement le début
+    log_info("🚀 Test du chunking")
+    log_debug(f"Texte original: {test_text[:100]}...")  # Affiche seulement le début
 
     methods = [
         ("SentenceTransformersTokenTextSplitter", splitter_token_transformers, dict(tokens_per_chunk=300, chunk_overlap=50)),
@@ -95,15 +95,15 @@ def main(save_results=False, save_dir=None):
 
     stats = []
     for name, splitter, params in methods:
-        logger_info(logger, f"==> {name}")
+        log_info(f"==> {name}")
         chunks = splitter(test_text, test_metadata, **params)
-        logger_info(logger, f"Chunks: {len(chunks)} | min/max/mean mots: {min([c['token_count'] for c in chunks]) if chunks else 0}/"
+        log_info(f"Chunks: {len(chunks)} | min/max/mean mots: {min([c['token_count'] for c in chunks]) if chunks else 0}/"
                             f"{max([c['token_count'] for c in chunks]) if chunks else 0}/"
                             f"{round(sum([c['token_count'] for c in chunks])/len(chunks), 2) if chunks else 0}")
         stats.append(get_stats(chunks, name))
 
     df = pd.DataFrame(stats)
-    logger_info(logger, f"Résumé stats:\n{df[['method','num_chunks','mean_words','mean_chars']]}")
+    log_info(f"Résumé stats:\n{df[['method','num_chunks','mean_words','mean_chars']]}")
 
     # Calcul de l'écart-type des tailles de chunks (mots)
     df['std_words'] = [np.std([c['token_count'] for c in splitter(TEXT, {"source": "test"}, **params)])
@@ -116,8 +116,8 @@ def main(save_results=False, save_dir=None):
     df['score'] = df.apply(score_chunking, axis=1)
     df = df.sort_values('score', ascending=False)
 
-    logger_info(logger, f"\n===== SCORING DES MÉTHODES (RAG/Agent) =====\n{df[['method','score','num_chunks','mean_words','std_words','max_words','min_words']]}")
-    logger_info(logger, f"🏆 Meilleure méthode (score): {df.iloc[0]['method']} (score={df.iloc[0]['score']})")
+    log_info(f"\n===== SCORING DES MÉTHODES (RAG/Agent) =====\n{df[['method','score','num_chunks','mean_words','std_words','max_words','min_words']]}")
+    log_info(f"🏆 Meilleure méthode (score): {df.iloc[0]['method']} (score={df.iloc[0]['score']})")
 
     # Visualisation épurée
     variables = ['mean_words', 'mean_chars', 'num_chunks']
@@ -150,7 +150,7 @@ def main(save_results=False, save_dir=None):
         os.makedirs(save_dir, exist_ok=True)
         save_path = os.path.join(save_dir, "chunking_stats.csv")
         df.to_csv(save_path, index=False)
-        logger_info(logger, f"Résultats sauvegardés dans {save_path}")
+        log_info(f"Résultats sauvegardés dans {save_path}")
 
 if __name__ == "__main__":
     save_dir = os.environ.get("SAVE_DIR")
