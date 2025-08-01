@@ -1,47 +1,75 @@
-# Test de Chunking avec SentenceTransformers
+# 🧩 Benchmark Chunking pour RAG & Agent IA
 
-Ce projet teste la fonction de découpage de texte (chunking) utilisant SentenceTransformers sur la phrase "La voiture est rouge".
+Ce projet permet de **tester, comparer et scorer automatiquement** différentes méthodes de découpage de texte ("chunking") pour des usages de type RAG (Retrieval-Augmented Generation) ou d'agents IA.
 
-## Installation
+## 🚀 Objectif
+
+- **Comparer** plusieurs techniques de chunking (SentenceTransformers, RecursiveCharacter, CharacterTextSplitter…)
+- **Mesurer** leurs performances sur un texte de test (nombre de chunks, taille moyenne, homogénéité…)
+- **Scorer** chaque méthode selon des critères pertinents pour le RAG/agent (granularité, homogénéité, taille…)
+- **Visualiser** les résultats et le classement via des graphiques Seaborn
+- **Exporter** les résultats pour analyse ou reporting
+
+## 📦 Installation
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## Utilisation
+## ⚙️ Utilisation
 
 ```bash
 python test_chunking.py
 ```
 
-## Description
+- Pour sauvegarder les résultats (CSV/logs) dans un dossier :
+  ```bash
+  SAVE_RESULTS=1 SAVE_DIR=results python test_chunking.py
+  ```
 
-Le script teste différentes configurations de chunking :
-- **Paramètres par défaut** : tokens_per_chunk=300, chunk_overlap=50
-- **Chunks très petits** : tokens_per_chunk=2, chunk_overlap=1  
-- **Chunks petits** : tokens_per_chunk=10, chunk_overlap=2
+## 📝 Fonctionnement
 
-## Fonction principale
+- Le script applique plusieurs méthodes de chunking sur un texte de test (modifiable dans `test/text.py`).
+- Pour chaque méthode, il calcule :
+  - Nombre de chunks
+  - Taille moyenne/min/max/écart-type (en mots et caractères)
+- Un **score** automatique est attribué à chaque méthode selon des critères adaptés au RAG/agent (voir code).
+- Un graphique Seaborn affiche la comparaison.
+- Le classement/scoring est loggé et exporté si demandé.
 
-```python
-def splitter_token_transformers(text, metadata, tokens_per_chunk=300, chunk_overlap=50):
-    """
-    Découpe un texte en chunks à l'aide de SentenceTransformers
-    
-    Args:
-        text: Le texte à découper
-        metadata: Les métadonnées à associer aux chunks
-        tokens_per_chunk: Nombre de tokens par chunk
-        chunk_overlap: Nombre de tokens de chevauchement entre chunks
-    
-    Returns:
-        Liste de dictionnaires contenant le texte, métadonnées et nombre de tokens
-    """
-```
+## 🏆 Critères de scoring (exemple)
 
-## Résultats attendus
+- Nombre de chunks raisonnable (10–100)
+- Taille moyenne des chunks adaptée (30–200 mots)
+- Homogénéité (écart-type faible)
+- Chunk max < 300 mots
+- Chunk min pas trop petit
 
-Pour une phrase courte comme "La voiture est rouge", les différents paramètres permettront de voir :
-- Comment le texte est découpé en fonction de la taille des chunks
-- L'effet du chevauchement entre chunks
-- La préservation des métadonnées dans chaque chunk
+*(Les critères sont ajustables dans le code.)*
+
+## 📊 Exemple de sortie
+
+- Logs détaillés dans le terminal et/ou un fichier log
+- Fichier CSV des stats dans le dossier choisi
+- Graphique comparatif généré automatiquement
+
+## 🔧 Personnalisation
+
+- Modifiez le texte de test dans `test/text.py`
+- Ajoutez vos propres méthodes de chunking dans `test_chunking.py`
+- Adaptez les critères de scoring selon vos besoins métier
+
+## 📁 Structure
+
+- `test_chunking.py` : script principal (tests, scoring, visualisation)
+- `test/text.py` : texte de test
+- `utils/logger.py` : gestion des logs
+- `requirements.txt` : dépendances Python
+
+## 🤝 Contribuer
+
+Suggestions, issues et PR bienvenus !
+
+---
+
+**Ce projet vous aide à choisir la meilleure stratégie de chunking pour vos pipelines RAG ou vos agents IA, de façon reproductible et visuelle.**

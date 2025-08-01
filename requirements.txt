@@ -2,3 +2,11 @@ langchain
 langchain-text-splitters
 sentence-transformers
 torch
+
+seaborn
+matplotlib
+pandas
+dotenv
+python-dotenv
+
+numpy

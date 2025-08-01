@@ -1,0 +1,11 @@
+# env
+.env
+
+# pycache
+__pycache__/
+
+# logs
+logs/
+
+# results
+results/
